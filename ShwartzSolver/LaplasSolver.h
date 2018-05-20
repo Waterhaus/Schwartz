@@ -2,6 +2,15 @@
 #include "Matrix.h"
 #include <vector>
 
+double f(double x, double y)
+{
+	return x*y;
+}
+double g(double x, double y)
+{
+	return 1.0;
+}
+
  Matrix<double> CreateLaplasMatrix(int N)
 {
 	int dim = (int)pow((N - 1), 2); //–азмерность матрицы
@@ -30,12 +39,12 @@
 	return A;
 }
 
- Matrix<int> CreateLaplasMatrixForCircle(int N)
+ Matrix<double> CreateLaplasMatrixForCircle(int N, vector<int>* s_index)
  {
-	 Matrix<int> L(N); //= CreateLaplasMatrix(N); 
+	 Matrix<int> C(N); //= CreateLaplasMatrix(N); 
 	 
-	 Matrix<double> M = CreateLaplasMatrix(N);
-	 vector<int> s_index(M.Size());
+	 Matrix<double> L = CreateLaplasMatrix(N + 1);
+	 (*s_index).resize(L.Size());
 	 int n = N / 2;
 	 double R = (double)N / 2.0;
 	 double I = 0;
@@ -47,58 +56,59 @@
 			 I = sqrt((double)((i - n)*(i - n)) + (double)((j - n)*(j - n)));
 			 if (I <= R) 
 			 { 
-				 L[i][j] = 1; 
+				 C[i][j] = 1; 
 			 }
-			 else L[i][j] = 0;
+			 else C[i][j] = 0;
 
-			 if ((i == 0 || i == N - 1) && L[i][j] == 1) 
-				 L[i][j] = 2;
-			 if ((j == 0 || j == N - 1) && L[i][j] == 1) 
-				 L[i][j] = 2;
+			 if ((i == 0 || i == N - 1) && C[i][j] == 1) 
+				 C[i][j] = 2;
+			 if ((j == 0 || j == N - 1) && C[i][j] == 1) 
+				 C[i][j] = 2;
 
 			 if( j > 0  )
 			 {
-				 if (L[i][j] == 1 && L[i][j - 1] == 0) L[i][j] = 2;
-				 if (L[i][j] == 0 && L[i][j - 1] == 1) L[i][j - 1] = 2;
+				 if (C[i][j] == 1 && C[i][j - 1] == 0) C[i][j] = 2;
+				 if (C[i][j] == 0 && C[i][j - 1] == 1) C[i][j - 1] = 2;
 			
 			 }
 
-			 s_index[index] = L[i][j];
+			 (*s_index)[index] = C[i][j];
 			 index++;
 			
 			
 		 }
 	 }
 
-	 return L;
- }
-
- /*
- Matrix<double> CreateMapForCircle(int N)
- {
-	 vector<vector<int>> map;
-	 vector<int> data;
-
-	 int n = N / 2;
-	 double R = (double)N / 2.0;
-	 double I = 0;
-	 double I_old = 0;
-	 double I_new = 0;
-	 int isGamma;
-	 int s = 0;
-	 for (int i = 0; i < N; i++)
+	 for (size_t i = 0; i < (*s_index).size(); i++)
 	 {
-		 for (int j = 0; j < N; j++)
+		 if((*s_index)[i] == 0 || (*s_index)[i] == 2)
 		 {
-			 s++;
-			 I = sqrt((double)((i - n)*(i - n)) + (double)((j - n)*(j - n)));
-			 if (I >= R)
+			 for (size_t j = 0; j < (*s_index).size(); j++)
 			 {
-				 data = {s,,i,j};
+				 if (i != j) L[i][j] = 0;
+				 else L[i][j] = 1;
 			 }
 		 }
 	 }
 
 	 return L;
  }
-*/
+
+Vector<double> CreateRightPart(vector<int>* index, int N, double h)
+{
+	Vector<double> b(index->size());
+
+	int i = 0;
+	int j = 0;
+	for (size_t s = 0; s < b.Size(); s++)
+	{
+		//проверка дл€ j 
+		if (i == N) i = 0;
+		// найдем теперь i
+		j = (int)(((double)(s - i)) / ((double)N));
+
+		if ((*index)[s] == 2) b[s] = g(0,0);
+		if ((*index)[s] == 1) b[s] = f(i*h, j*h);
+	}
+	return b;
+}
