@@ -12,12 +12,14 @@ using namespace std;
 
 int main()
 {
-	int N = 23;
+	int N = 79;
 	vector<int> index;
 	Matrix<double> L = CreateLaplasMatrixForCircle(N,&index);
+
+	print_index(index, N);
 	Vector<double> b = CreateRightPart(&index, N, 0.1);
 	Vector<double> x(b.Size());
-	Vector<double> anser = Relax(L, b, x, 0.8, 0.0001);
+	Vector<double> anser = RelaxMini(L, b, x, 1.4, 0.0001,N);
 	
 	SaveToFile("file1", &anser, N);
 	char a;
