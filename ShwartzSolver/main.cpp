@@ -8,11 +8,12 @@
 #include "Relax.h"
 #include "LaplasSolver.h"
 #include "SaveFile.h"
+#include "ShwartzSolver.h"
 using namespace std;
 
 int main()
 {
-	int N = 79;
+	/*int N = 79;
 	vector<int> index;
 	Matrix<double> L = CreateLaplasMatrixForCircle(N,&index);
 
@@ -22,6 +23,9 @@ int main()
 	Vector<double> anser = RelaxMini(L, b, x, 1.4, 0.0001,N);
 	
 	SaveToFile("file1", &anser, N);
+	*/
+	ShwartzSolver solver(2,2,30,30,0.5,0.5,1);
+	cout << solver.CreateMap();
 	char a;
 	cin >> a;
     return 0;

@@ -3,32 +3,49 @@
 template <class T>
 class Matrix
 {
-	size_t size;
+	size_t size_i, size_j;
 	T **m;
 public:
 	Matrix()
 	{
-		size = 4;
-		m = new T*[size];
-		for (int i = 0; i < size; ++i)
-			m[i] = new T[size];
-		for (int i = 0; i < size; ++i)
+		size_i = size_j = 4;
+		m = new T*[size_i];
+		for (int i = 0; i < size_i; ++i)
+			m[i] = new T[size_j];
+		for (int i = 0; i < size_i; ++i)
 		{
-			for (int j = 0; j < size; ++j)
+			for (int j = 0; j < size_j; ++j)
 			{
 				m[i][j] = 0;
 			}
 		}
 	}
+
 	Matrix(size_t n)
 	{
-		size = n;
-		m = new T*[size];
-		for (int i = 0; i < size; ++i)
-			m[i] = new T[size];
-		for (int i = 0; i < size; ++i)
+		size_i = size_j = n;
+		m = new T*[size_i];
+		for (int i = 0; i < size_i; ++i)
+			m[i] = new T[size_i];
+		for (int i = 0; i < size_i; ++i)
 		{
-			for (int j = 0; j < size; ++j)
+			for (int j = 0; j < size_i; ++j)
+			{
+				m[i][j] = 0;
+			}
+		}
+	}
+
+	Matrix(size_t N, size_t M)
+	{
+		size_i = N;
+		size_j = M;
+		m = new T*[N];
+		for (int i = 0; i < N; ++i)
+			m[i] = new T[M];
+		for (int i = 0; i < N; ++i)
+		{
+			for (int j = 0; j < M; ++j)
 			{
 				m[i][j] = 0;
 			}
@@ -36,13 +53,14 @@ public:
 	}
 	Matrix(const Matrix &rV)
 	{
-		this->size = rV.size;
-		m = new T*[size];
-		for (int i = 0; i < size; ++i)
-			m[i] = new T[size];
-		for (int i = 0; i < size; ++i)
+		this->size_i = rV.size_i;
+		this->size_j = rV.size_j;
+		m = new T*[size_i];
+		for (int i = 0; i < size_i; ++i)
+			m[i] = new T[size_j];
+		for (int i = 0; i < size_i; ++i)
 		{
-			for (int j = 0; j < size; ++j)
+			for (int j = 0; j < size_j; ++j)
 			{
 				m[i][j] = rV.m[i][j];
 			}
@@ -50,10 +68,10 @@ public:
 	}
 	Matrix operator=(const Matrix &rV)
 	{
-		this->size = rV.size;
-		for (int i = 0; i < size; ++i)
+		this->size_i = rV.size_i;
+		for (int i = 0; i < size_i; ++i)
 		{
-			for (int j = 0; j < size; ++j)
+			for (int j = 0; j < size_i; ++j)
 			{
 				m[i][j] = rV[i][j];
 			}
@@ -63,12 +81,12 @@ public:
 
 	Matrix operator + (Matrix &a)
 	{
-		Matrix c(size);
+		Matrix c(size_i);
 
-		for (size_t i = 0; i < size; i++)
+		for (size_t i = 0; i < size_i; i++)
 		{
 			//c[i] = v[i] + a[i];
-			for (size_t j = 0; j < size; j++)
+			for (size_t j = 0; j < size_i; j++)
 			{
 				c[i][j] = v[i][j] + a[i][j];
 			}
@@ -79,12 +97,12 @@ public:
 
 	Matrix operator - (Matrix &a)
 	{
-		Matrix c(size);
+		Matrix c(size_i);
 
-		for (size_t i = 0; i < size; i++)
+		for (size_t i = 0; i < size_i; i++)
 		{
 			//c[i] = v[i] + a[i];
-			for (size_t j = 0; j < size; j++)
+			for (size_t j = 0; j < size_i; j++)
 			{
 				c[i][j] = v[i][j] + a[i][j];
 			}
@@ -95,11 +113,11 @@ public:
 
 	Matrix operator * (Matrix &B)
 	{
-		Matrix C = new Matrix(B.size);
+		Matrix C = new Matrix(B.size_i);
 
-		for (int i = 0; i < size; i++)
-			for (int j = 0; j < size; j++)
-				for (int r = 0; r < size; r++)
+		for (int i = 0; i < size_i; i++)
+			for (int j = 0; j < size_i; j++)
+				for (int r = 0; r < size_i; r++)
 					C[i][j] += m[i][r] * B[r][j];
 
 		return C;
@@ -111,9 +129,9 @@ public:
 
 		
 		//A*x = b
-		for (int i = 0; i < size; i++)
+		for (int i = 0; i < size_i; i++)
 		{
-			for (int j = 0; j < size; j++)
+			for (int j = 0; j < size_i; j++)
 			{
 				b[i] += m[i][j] * x[j];
 			}
@@ -123,18 +141,18 @@ public:
 
 	friend istream &operator >> (istream &stream, Matrix &a)
 	{
-		for (int i = 0; i < a.size; ++i)
+		for (int i = 0; i < a.size_i; ++i)
 		{
-			for (int j = 0; j < a.size; ++j)
+			for (int j = 0; j < a.size_j; ++j)
 				stream >> a.m[i][j];
 		}
 		return stream;
 	}
 	friend ostream &operator <<(ostream &stream, Matrix &a)
 	{
-		for (int i = 0; i < a.size; ++i)
+		for (int i = 0; i < a.size_i; ++i)
 		{
-			for (int j = 0; j < a.size; ++j)
+			for (int j = 0; j < a.size_j; ++j)
 				stream << a.m[i][j] << " ";
 			stream << endl;
 		}
@@ -142,14 +160,14 @@ public:
 	}
 	T* operator [](int k)
 	{
-		if (k < size)
+		if (k < size_i)
 			return m[k];
 		else
 			return NULL;
 	}
 	~Matrix()
 	{
-		for (int i = 0; i < size; ++i)
+		for (int i = 0; i < size_i; ++i)
 		{
 			delete[] m[i];
 		}
@@ -158,7 +176,7 @@ public:
 
 	size_t Size()
 	{
-		return size;
+		return size_i;
 	}
 
 	
