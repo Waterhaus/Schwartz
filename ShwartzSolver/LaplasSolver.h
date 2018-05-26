@@ -11,7 +11,7 @@ double g(double x, double y)
 	return sin(x + y) + 0.5;
 }
 
-Matrix<double> Laplas(int N1, double hx, double hy)
+Matrix<double> Laplas(int N1,  double hx, double hy)
 {
 
 	int dim = N1 * N1; //Размерность матрицы
@@ -44,6 +44,44 @@ Matrix<double> Laplas(int N1, double hx, double hy)
 	return A;
 
 }
+
+
+
+Matrix<double> Laplas(int N, int M, double hx, double hy)
+{
+
+	int dim = N * M; //Размерность матрицы
+	Matrix<double> A(dim);
+
+
+	
+
+	int i = 0;
+	for (int s = 0; s < dim; s++)
+	{
+
+		//проверка для j 
+		if (i == N) i = 0;
+		// найдем теперь i
+		int j = (int)(((double)(s - i)) / ((double)N));
+
+		A[s][ s] = 2 * (1.0f / (hx*hx) + 1.0f / (hy*hy));
+
+		if (i < N - 1) A[s + 1][s] = -1.0f / (hx*hx);
+		if (i > 0) A[s - 1][s] = -1.0f / (hx*hx);
+
+
+		if (j < M - 1) A[s + M][s] = -1.0f / (hy*hy);
+		if (j > 0) A[s - M][s] = -1.0f / (hy*hy);
+
+
+		i++;
+	}
+
+	return A;
+
+}
+
 
  Matrix<double> CreateLaplasMatrix(int N)
 {
