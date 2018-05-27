@@ -8,7 +8,7 @@ double f(double x, double y)
 }
 double g(double x, double y)
 {
-	return sin(x + y) + 0.5;
+	return 10*sin(x) + 20;
 }
 
 Matrix<double> Laplas(int N1,  double hx, double hy)
@@ -59,7 +59,10 @@ Matrix<double> Laplas(int N, int M, double hx, double hy)
 	int i = 0;
 	for (int s = 0; s < dim; s++)
 	{
-
+		if (s == dim - 1)
+		{
+			int c = 0;
+		}
 		//проверка для j 
 		if (i == N) i = 0;
 		// найдем теперь i
@@ -67,18 +70,58 @@ Matrix<double> Laplas(int N, int M, double hx, double hy)
 
 		A[s][ s] = 2 * (1.0f / (hx*hx) + 1.0f / (hy*hy));
 
-		if (i < N - 1) A[s + 1][s] = -1.0f / (hx*hx);
-		if (i > 0) A[s - 1][s] = -1.0f / (hx*hx);
+		if (i < N - 1) 
+			A[s][s + 1] = -1.0f / (hx*hx);
+		if (i > 0)
+			A[s ][s - 1] = -1.0f / (hx*hx);
 
 
-		if (j < M - 1) A[s + M][s] = -1.0f / (hy*hy);
-		if (j > 0) A[s - M][s] = -1.0f / (hy*hy);
+		if (j < M - 1) 
+			A[s][s + M] = -1.0f / (hy*hy);
+		if (j > 0) 
+			A[s][s - M] = -1.0f / (hy*hy);
 
-
+		cout << A[s][s] << endl;
 		i++;
 	}
 
 	return A;
+
+}
+
+
+void Laplas(Matrix<double> *A, int N, int M, double hx, double hy)
+{
+
+	int dim = N * M; //Размерность матрицы
+
+	int i = 0;
+	for (int s = 0; s < dim; s++)
+	{
+		
+		//проверка для j 
+		if (i == N) i = 0;
+		// найдем теперь i
+		int j = (int)(((double)(s - i)) / ((double)N));
+
+		(*A)[s][s] = 2 * (1.0f / (hx*hx) + 1.0f / (hy*hy));
+
+		if (i < N - 1)
+			(*A)[s][s + 1] = -1.0f / (hx*hx);
+		if (i > 0)
+			(*A)[s][s - 1] = -1.0f / (hx*hx);
+
+
+		if (j < M - 1)
+			(*A)[s][s + N] = -1.0f / (hy*hy);
+		if (j > 0)
+			(*A)[s][s - N] = -1.0f / (hy*hy);
+
+		
+		i++;
+	}
+
+	
 
 }
 
@@ -110,6 +153,80 @@ Matrix<double> Laplas(int N, int M, double hx, double hy)
 
 	return A;
 }
+
+
+ void LaplasMatrixForCircle(Matrix<double>* L,int N_x,int M_y, vector<int>* s_index, double hx, double hy)
+ {
+	 Matrix<int> C(N_x,M_y); //= CreateLaplasMatrix(N); 
+
+	 Laplas(L,N_x,M_y, hx, hy);
+	 (*s_index).resize(L->Size());
+	 int n = N_x / 2;
+	 double R = (double)N_x / 2.0;
+	 double I = 0;
+	 int index = 0;
+	 for (size_t i = 0; i < N_x; i++)
+	 {
+		 for (size_t j = 0; j < M_y; j++)
+		 {
+			 I = sqrt((double)((i - n)*(i - n)) + (double)((j - n)*(j - n)));
+			 if (I <= R)
+			 {
+				 C[i][j] = 1;
+				 (*s_index)[index] = 1;
+			 }
+			 else {
+				 C[i][j] = 0;
+				 (*s_index)[index] = 0;
+			 }
+
+			 if ((i == 0 || i == N_x - 1) && C[i][j] == 1)
+			 {
+				 C[i][j] = 2;
+				 (*s_index)[index] = 2;
+			 }
+			 if ((j == 0 || j == N_x - 1) && C[i][j] == 1)
+			 {
+				 C[i][j] = 2;
+				 (*s_index)[index] = 2;
+			 }
+
+			 if (j > 0)
+			 {
+				 if (C[i][j] == 1 && C[i][j - 1] == 0)
+				 {
+					 C[i][j] = 2;
+					 (*s_index)[index] = 2;
+				 }
+				 if (C[i][j] == 0 && C[i][j - 1] == 1) {
+					 C[i][j - 1] = 2;
+					 (*s_index)[index - 1] = 2;
+				 }
+
+			 }
+
+
+			 index++;
+
+
+		 }
+	 }
+
+	 for (size_t i = 0; i < (*s_index).size(); i++)
+	 {
+		 if ((*s_index)[i] == 0 || (*s_index)[i] == 2)
+		 {
+			 for (size_t j = 0; j < (*s_index).size(); j++)
+			 {
+				 if (i != j) (*L)[i][j] = 0;
+				 else (*L)[i][j] = 1;
+			 }
+		 }
+	 }
+	 // cout << C;
+	 
+ }
+
 
  Matrix<double> CreateLaplasMatrixForCircle(int N, vector<int>* s_index)
  {
@@ -196,21 +313,21 @@ Matrix<double> Laplas(int N, int M, double hx, double hy)
 
  }
 
-Vector<double> CreateRightPart(vector<int>* index, int N, double h)
+void CreateRightPart(Vector<double>* b,vector<int>* index, int N, double hx,double hy, double Rx, double Ry)
 {
-	Vector<double> b(index->size());
+	
 
 	int i = 0;
 	int j = 0;
-	for (size_t s = 0; s < b.Size(); s++)
+	for (size_t s = 0; s < b->Size(); s++)
 	{
 		//проверка для j 
 		if (i == N) i = 0;
 		// найдем теперь i
 		j = (int)(((double)(s - i)) / ((double)N));
 
-		if ((*index)[s] == 2) b[s] = g(i*h, j*h);
-		if ((*index)[s] == 1) b[s] = f(i*h, j*h);
+		if ((*index)[s] == 2) (*b)[s] = g(i*hx - Rx, j*hy - Ry);
+		if ((*index)[s] == 1) (*b)[s] = f(i*hx - Rx, j*hy - Ry);
 	}
-	return b;
+
 }

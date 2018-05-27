@@ -3,6 +3,7 @@
 #include "Matrix.h"
 #include <vector>
 #include <iostream>
+#include "LaplasSolver.h"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ public:
 	Gebeat HorizonalLine;
 	Gebeat VerticalLine;
 	Gebeat Circle;
-
+	
 
 
 	 double GetStep(int GridSize, double a_border, double b_border)
@@ -89,7 +90,7 @@ public:
 		 HorizonalLine.global_x = 0;
 		 HorizonalLine.global_y = k_y;
 
-
+		 HorizonalLine.u = new Vector<double>(HorizonalLine.Local_X_size*HorizonalLine.Local_Y_size);
 
 
 		 int k_x = (int)((Rx - length_vert)/hx);
@@ -97,13 +98,13 @@ public:
 		 VerticalLine.Local_Y_size = M_y;
 		 VerticalLine.global_x = k_x;
 		 VerticalLine.global_y = 0;
-
+		 VerticalLine.u = new Vector<double>(VerticalLine.Local_X_size*VerticalLine.Local_Y_size);
 
 		 Circle.global_x = GetIndexX(-radius);
 		 Circle.global_y = GetIndexY(-radius);
 		 Circle.Local_X_size = 2 * GetIndexX(( radius - Rx)) + 1;
 		 Circle.Local_Y_size = 2 * GetIndexY((radius - Ry)) + 1;
-
+		 Circle.u = new Vector<double>(Circle.Local_X_size*Circle.Local_Y_size);
 	 }
 
 	 Matrix<int> CreateMap()
@@ -218,11 +219,11 @@ public:
 		
 	 }
 
-	 void CreateRigthPartH(Gebeat G, Vector<double> *b)
+	 void CreateRigthPartH(Gebeat* G, Vector<double> *b, Matrix<double>* L)
 	 {
-		 int N_x = G.Local_X_size;
-		 int M_y = G.Local_Y_size;
-
+		 int N_x = (*G).Local_X_size;
+		 int M_y = (*G).Local_Y_size;
+		 int dim = N_x*M_y;
 		  
 		 int lbord_x = GetIndexX(-sqrt(Radius*Radius - ly*ly));
 		 int rbord_x = GetIndexX(sqrt(Radius*Radius - ly*ly));
@@ -233,17 +234,24 @@ public:
 			 
 			 for (size_t y = 0; y < M_y; y++)
 			 {
-				 s = x*N_x + y;
+				 s = x*M_y + y;
 				 if (x == 0 || x == N_x - 1 || y == 0 || y == M_y - 1) 
 				 {
 					 if (x <= lbord_x || x >= rbord_x) 
 					 {
 						 (*b)[s] = g(x*hx - Rx, y*hy - Ry);
-					 
+						 
 					 }
 					 else (*b)[s] = 0;
-				 }
 
+					 for (size_t i = 0; i < dim; i++)
+					 {
+						 if (i != s)
+							 (*L)[s][i] = 0; 
+						 else
+							 (*L)[s][i] = 1;
+					 }
+				 }else
 				 (*b)[s] = f(x*hx - Rx, y*hy - Ry);
 			 }
 		 }
@@ -253,12 +261,12 @@ public:
 
 
 
-	 Vector<double> CreateRigthPartV(Gebeat G)
+	 void CreateRigthPartV(Gebeat* G, Vector<double> *b, Matrix<double>* L)
 	 {
-		 int N_x = G.Local_X_size;
-		 int M_y = G.Local_Y_size;
-
-		 Vector<double> b(N_x*M_y - 1);
+		 int N_x = G->Local_X_size;
+		 int M_y = G->Local_Y_size;
+		 int dim = N_x*M_y;
+		
 
 		 int lbord_y = GetIndexY(-sqrt(Radius*Radius - lx*lx));
 		 int rbord_y = GetIndexY(sqrt(Radius*Radius - lx*lx));
@@ -269,18 +277,26 @@ public:
 
 			 for (size_t y = 0; y < M_y; y++)
 			 {
-				 s = x*N_x + y;
+				 s = x*M_y + y;
 				 if (x == 0 || x == N_x - 1 || y == 0 || y == M_y - 1)
 				 {
 					 if (y <= lbord_y || y >= rbord_y)
 					 {
-						 b[s] = g(x*hx - Rx, y*hy - Ry);
-
+						 (*b)[s] = g(x*hx - Rx, y*hy - Ry);
+					
 					 }
-					 else b[s] = 0;
-				 }
+					 else (*b)[s] = 0;
 
-				 b[s] = f(x*hx - Rx, y*hy - Ry);
+					 for (size_t i = 0; i < dim; i++)
+					 {
+						 if (i != s)
+							 (*L)[s][i] = 0;
+						 else
+							 (*L)[s][i] = 1;
+					 }
+				 }else
+				 (*b)[s] = f(x*hx - Rx, y*hy - Ry);
+				
 			 }
 		 }
 	 }
@@ -291,16 +307,109 @@ public:
 		 int M_y = horiz->Local_Y_size;
 
 		 int SIZE = N_x*M_y;
+		 Matrix<double> A(SIZE);
+		 Laplas(&A,N_x,M_y, h_x, h_y);
 		 
-		 Matrix<double> A = Laplas(N_x,M_y, h_x, h_y);
+		
 		 Vector<double> b(SIZE);
-		 CreateRigthPartH((*horiz), &b);
-		 Vector<double> x0(SIZE);
+		 CreateRigthPartH(horiz, &b,&A);
+		
+		 Vector<double> x0 = Vector<double>::Identity(SIZE);
 		 Vector<double> x(SIZE);
-		 RelaxMini(&A, &b, &x0, 0.5, 0.0001, M_y);
 		 
-		 horiz->u = &x;
+		 
+		 RelaxFast(&A, &b, &x0,horiz->u ,1.1, 0.000001, N_x);
+		 int a = 0;
+		
+		
 	 }
 
+	 void SolveInVertical(Gebeat *vert, double h_x, double h_y)
+	 {
+		 int N_x = vert->Local_X_size;
+		 int M_y = vert->Local_Y_size;
+
+		 int SIZE = N_x*M_y;
+		 
+			 Matrix<double> A(SIZE);
+			 Laplas(&A, N_x, M_y , h_x, h_y);
+		 
+		 //
+
+
+		Vector<double> b(SIZE);
+		CreateRigthPartV(vert, &b,&A);
+
+		Vector<double> x0 = Vector<double>::Identity(SIZE);
+		Vector<double> x(SIZE);
+
+		 RelaxFast(&A, &b, &x0, vert->u, 1.1, 0.000001, M_y);
+		
+
+
+	 }
+
+
+	 void SolveInCircle(Gebeat *circle, double h_x, double h_y)
+	 {
+		 vector<int> index;
+		 int N_x = circle->Local_X_size;
+		 int M_y = circle->Local_Y_size;
+
+		 int SIZE = N_x*M_y;
+
+		 Matrix<double> A(SIZE);
+		 Vector<double> b(SIZE);
+
+		 LaplasMatrixForCircle(&A,N_x,M_y,&index,h_x,h_y);
+
+	
+		 CreateRightPart(&b,&index,N_x,h_x,h_y,Rx,Ry);
+		
+		 Vector<double> x0 = Vector<double>::Identity(SIZE);
+		 Vector<double> x(SIZE);
+
+		 RelaxFast(&A, &b, &x0, circle->u, 0.5, 0.000001, M_y);
+	 }
+
+	 void PasteInPlace(Gebeat *G,Matrix<double> *U)
+	 {
+		 int index_x = G->global_x;
+		 int index_y = G->global_y;
+		 int N_x = G->Local_X_size;
+		 int M_y = G->Local_Y_size;
+		 int xx = 0;
+		 int yy = 0;
+		 for (size_t x = index_x; x < index_x + N_x; x++)
+		 {
+			 
+			 for (size_t y = index_y; y < index_y + M_y; y++)
+			 {
+				
+				(*U)[y][x] += (*(G->u))[xx*M_y + yy];
+				yy++;
+			 }
+			 xx++;
+			 yy = 0;
+		 }
+
+	 }
+
+	 void SaveSolution()
+	 {
+		 Matrix<double> U(Y_size, X_size);
+
+		 SolveInVertical(&VerticalLine, hx, hy);
+		 PasteInPlace(&VerticalLine, &U);
+
+
+		 SolveInHorizontal(&HorizonalLine, hx, hy);		
+		 PasteInPlace(&HorizonalLine, &U);
+
+		 SolveInCircle(&Circle, hx, hy);
+		 PasteInPlace(&Circle, &U);
+
+		 SaveMatrixToFile("save mat", &U);
+	 }
 
 };

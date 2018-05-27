@@ -4,19 +4,23 @@ template <class T>
 class Matrix
 {
 	size_t size_i, size_j;
-	T **m;
+	
+	vector<vector<T>> Mat;
+
 public:
 	Matrix()
 	{
 		size_i = size_j = 4;
-		m = new T*[size_i];
+		Mat.resize(size_i);
+
 		for (int i = 0; i < size_i; ++i)
-			m[i] = new T[size_j];
+			Mat[i].resize(size_j);
+
 		for (int i = 0; i < size_i; ++i)
 		{
 			for (int j = 0; j < size_j; ++j)
 			{
-				m[i][j] = 0;
+				Mat[i][j] = 0;
 			}
 		}
 	}
@@ -24,14 +28,16 @@ public:
 	Matrix(size_t n)
 	{
 		size_i = size_j = n;
-		m = new T*[size_i];
+		Mat.resize(size_i);
+
 		for (int i = 0; i < size_i; ++i)
-			m[i] = new T[size_i];
+			Mat[i].resize(size_j);
+
 		for (int i = 0; i < size_i; ++i)
 		{
 			for (int j = 0; j < size_i; ++j)
 			{
-				m[i][j] = 0;
+				Mat[i][j] = 0;
 			}
 		}
 	}
@@ -40,14 +46,15 @@ public:
 	{
 		size_i = N;
 		size_j = M;
-		m = new T*[N];
+		Mat.resize(N);
 		for (int i = 0; i < N; ++i)
-			m[i] = new T[M];
+			Mat[i].resize(M);
+
 		for (int i = 0; i < N; ++i)
 		{
 			for (int j = 0; j < M; ++j)
 			{
-				m[i][j] = 0;
+				Mat[i][j] = 0;
 			}
 		}
 	}
@@ -55,25 +62,35 @@ public:
 	{
 		this->size_i = rV.size_i;
 		this->size_j = rV.size_j;
-		m = new T*[size_i];
+		Mat.resize(size_i);
 		for (int i = 0; i < size_i; ++i)
-			m[i] = new T[size_j];
+			Mat[i].resize(size_j);
+
+
 		for (int i = 0; i < size_i; ++i)
 		{
 			for (int j = 0; j < size_j; ++j)
 			{
-				m[i][j] = rV.m[i][j];
+				Mat[i][j] = rV.Mat[i][j];
 			}
 		}
 	}
+
+
 	Matrix operator=(const Matrix &rV)
 	{
 		this->size_i = rV.size_i;
+		this->size_j = rV.size_j;
+
+		Mat.resize(size_i);
+		for (int i = 0; i < size_i; ++i)
+			Mat[i].resize(size_j);
+
 		for (int i = 0; i < size_i; ++i)
 		{
 			for (int j = 0; j < size_i; ++j)
 			{
-				m[i][j] = rV[i][j];
+				Mat[i][j] = rV[i][j];
 			}
 		}
 		return *this;
@@ -118,7 +135,7 @@ public:
 		for (int i = 0; i < size_i; i++)
 			for (int j = 0; j < size_i; j++)
 				for (int r = 0; r < size_i; r++)
-					C[i][j] += m[i][r] * B[r][j];
+					C[i][j] += Mat[i][r] * B[r][j];
 
 		return C;
 	}
@@ -133,7 +150,7 @@ public:
 		{
 			for (int j = 0; j < size_i; j++)
 			{
-				b[i] += m[i][j] * x[j];
+				b[i] += Mat[i][j] * x[j];
 			}
 		}
 		return b;
@@ -144,7 +161,7 @@ public:
 		for (int i = 0; i < a.size_i; ++i)
 		{
 			for (int j = 0; j < a.size_j; ++j)
-				stream >> a.m[i][j];
+				stream >> a.Mat[i][j];
 		}
 		return stream;
 	}
@@ -153,25 +170,20 @@ public:
 		for (int i = 0; i < a.size_i; ++i)
 		{
 			for (int j = 0; j < a.size_j; ++j)
-				stream << a.m[i][j] << " ";
+				stream << a.Mat[i][j] << " ";
 			stream << endl;
 		}
 		return stream;
 	}
-	T* operator [](int k)
+	vector<T> &operator [](int k)
 	{
 		if (k < size_i)
-			return m[k];
-		else
-			return NULL;
+			return Mat[k];
+			
 	}
 	~Matrix()
 	{
-		for (int i = 0; i < size_i; ++i)
-		{
-			delete[] m[i];
-		}
-		delete[]m;
+		 
 	}
 
 	size_t Size()
@@ -179,5 +191,13 @@ public:
 		return size_i;
 	}
 
+	size_t SizeN()
+	{
+		return size_i;
+	}
+	size_t SizeM()
+	{
+		return size_j;
+	}
 	
 };

@@ -9,12 +9,12 @@ template <class T>
 class Vector
 {
 	size_t size;
-	T *v;
+	vector<T> v;
 public:
 	Vector()
 	{
 		size = 4;
-		v = new T[size];
+		v.resize(size);
 		for (int i = 0; i < size; ++i)
 			v[i] = 0;
 	}
@@ -22,7 +22,7 @@ public:
 	Vector(size_t n)
 	{
 		size = n;
-		v = new T[size];
+		v.resize(size);
 		for (int i = 0; i < size; ++i)
 			v[i] = 0;
 	}
@@ -30,7 +30,7 @@ public:
 	Vector(const  Vector &rV)
 	{
 		this->size = rV.size;
-		this->v = new T[size];
+		v.resize(size);
 		for (int i = 0; i < this->size; ++i)
 			this->v[i] = rV.v[i];
 	}
@@ -38,7 +38,7 @@ public:
 	Vector(T *mas, size_t n)
 	{
 		size = n;
-		v = new T[size];
+		v.resize(size);
 		for (int i = 0; i < size; ++i)
 			v[i] = mas[i];
 	}
@@ -64,7 +64,7 @@ public:
 
 	~Vector()
 	{
-		delete[]v;
+		
 	}
 
 
@@ -116,6 +116,19 @@ public:
 			S = S + a[i] * b[i];
 		}
 		return S;
+
+	}
+
+	static Vector<T> Identity(int N)
+	{
+		size_t size = N;
+		Vector<T> vec(size);
+		T S = 0.0;
+		for (size_t i = 0; i < size; i++)
+		{
+			vec[i] = 1;
+		}
+		return vec;
 
 	}
 

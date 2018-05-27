@@ -24,3 +24,19 @@ void SaveToFile(string file, Vector<double> *anser, int N)
 
 
 }
+
+void SaveMatrixToFile(string file, Matrix<double> *U)
+{
+	ofstream myfile;
+	myfile.open(file + ".txt");
+	myfile << (*U).SizeN() << "\n";
+	myfile << (*U).SizeM() << "\n";
+
+	myfile << (*U);
+
+	myfile.close();
+	cout << "save to " + file << endl;
+
+
+
+}
