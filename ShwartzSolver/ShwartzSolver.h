@@ -395,6 +395,36 @@ public:
 
 	 }
 
+
+	 void CalculateSolution(int G_INDEX)
+	 {
+
+		 switch (G_INDEX)
+		 {
+		 case 0:
+			 SolveInVertical(&VerticalLine, hx, hy);
+			 break;
+		 case 1:
+			 SolveInHorizontal(&HorizonalLine, hx, hy);
+			 break;
+		 case 2:
+			break;
+		 default:
+			 break;
+		 }
+
+		 
+		 
+		 PasteInPlace(&VerticalLine, &U);
+
+PasteInPlace(&HorizonalLine, &U);
+
+		 SolveInCircle(&Circle, hx, hy);
+		 PasteInPlace(&Circle, &U);
+
+		 SaveMatrixToFile("save mat", &U);
+	 }
+
 	 void SaveSolution()
 	 {
 		 Matrix<double> U(Y_size, X_size);
