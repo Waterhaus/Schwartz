@@ -408,21 +408,10 @@ public:
 			 SolveInHorizontal(&HorizonalLine, hx, hy);
 			 break;
 		 case 2:
+			 SolveInCircle(&Circle, hx, hy);
 			break;
-		 default:
-			 break;
 		 }
 
-		 
-		 
-		 PasteInPlace(&VerticalLine, &U);
-
-PasteInPlace(&HorizonalLine, &U);
-
-		 SolveInCircle(&Circle, hx, hy);
-		 PasteInPlace(&Circle, &U);
-
-		 SaveMatrixToFile("save mat", &U);
 	 }
 
 	 void SaveSolution()
