@@ -148,6 +148,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DomainMethod.h" />
     <ClInclude Include="LaplasSolver.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="MPI_Shwartz.h" />

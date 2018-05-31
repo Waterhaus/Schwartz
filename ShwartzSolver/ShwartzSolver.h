@@ -14,6 +14,13 @@ struct Gebeat
 	Vector<double> *u;
 };
 
+struct IndexPair {
+
+	int x;
+	int y;
+
+};
+
 class ShwartzSolver {
 
 public:
@@ -29,6 +36,59 @@ public:
 	Gebeat VerticalLine;
 	Gebeat Circle;
 	
+	
+	IndexPair GlobalToLocal(Gebeat* G, int x, int y)
+	{
+		int N_x = G->Local_X_size;
+		int M_y = G->Local_Y_size;
+		int start_x = G->global_x;
+		int start_y = G->global_y;
+		IndexPair ind;
+		
+		if(start_x > x || start_x + N_x < x)
+		{
+			cout << "GlobalToLocal: bad x";
+			return ind;
+		}
+
+		if (start_y > y || start_y + M_y < y)
+		{
+			cout << "GlobalToLocal: bad y";
+			return ind;
+		}
+
+		ind.x = x - start_x;
+		ind.y = y - start_y;
+
+		return ind;
+	}
+
+
+	int GlobalToLocal_s(Gebeat* G, int x, int y)
+	{
+		int N_x = G->Local_X_size;
+		int M_y = G->Local_Y_size;
+		int start_x = G->global_x;
+		int start_y = G->global_y;
+		IndexPair ind;
+
+		if (start_x > x || start_x + N_x < x)
+		{
+			cout << "GlobalToLocal_s: bad x";
+			return 0;
+		}
+
+		if (start_y > y || start_y + M_y < y)
+		{
+			cout << "GlobalToLocal_s: bad y";
+			return 0;
+		}
+
+		ind.x = x - start_x;
+		ind.y = y - start_y;
+
+		return y*N_x + x;
+	}
 
 
 	 double GetStep(int GridSize, double a_border, double b_border)
@@ -234,7 +294,7 @@ public:
 			 
 			 for (size_t y = 0; y < M_y; y++)
 			 {
-				 s = x*M_y + y;
+				 s = y*N_x + x;
 				 if (x == 0 || x == N_x - 1 || y == 0 || y == M_y - 1) 
 				 {
 					 if (x <= lbord_x || x >= rbord_x) 
@@ -277,7 +337,7 @@ public:
 
 			 for (size_t y = 0; y < M_y; y++)
 			 {
-				 s = x*M_y + y;
+				 s = y*N_x + x;
 				 if (x == 0 || x == N_x - 1 || y == 0 || y == M_y - 1)
 				 {
 					 if (y <= lbord_y || y >= rbord_y)
@@ -369,7 +429,7 @@ public:
 		 Vector<double> x0 = Vector<double>::Identity(SIZE);
 		 Vector<double> x(SIZE);
 
-		 RelaxFast(&A, &b, &x0, circle->u, 0.5, 0.000001, M_y);
+		 RelaxFast(&A, &b, &x0, circle->u, 1.8, 0.000001, M_y);
 	 }
 
 	 void PasteInPlace(Gebeat *G,Matrix<double> *U)
