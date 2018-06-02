@@ -170,6 +170,10 @@ public:
 		return b;
 	}
 
-
+	void Resize(int SIZE)
+	{
+		v.resize(SIZE);
+		size = SIZE;
+	}
 
 };

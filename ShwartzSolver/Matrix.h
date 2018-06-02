@@ -199,5 +199,14 @@ public:
 	{
 		return size_j;
 	}
-	
+
+	void Resize(int SIZE)
+	{
+		size_i = size_j = SIZE;
+		Mat.resize(SIZE);
+		for (size_t i = 0; i < SIZE; i++)
+		{
+			Mat[i].resize(SIZE);
+		}
+	}
 };

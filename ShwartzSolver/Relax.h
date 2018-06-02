@@ -97,7 +97,7 @@ void RelaxFast(Matrix<double> *A,
 		for (size_t i = 0; i < x.Size(); i++)
 		{
 			S = 0;	
-			if (i < x.Size() - N - 1 && i > N)
+			//if (i < x.Size() - N - 1 && i > N)
 			//cout << i <<")  " << (*A)[i][i - N] << "  " << (*A)[i][i - 1] << "  " << (*A)[i][i] << "  " << (*A)[i][i + 1] << "  " << (*A)[i][i + N] << endl;
 
 			if (i > 0) S = S + (*A)[i][i - 1] * x[i - 1]; 

@@ -126,6 +126,44 @@ void Laplas(Matrix<double> *A, int N, int M, double hx, double hy)
 }
 
 
+
+void LaplasPolar(Matrix<double> *A, int N, int M, double hr, double hphi)
+{
+
+	int dim = N * M; //Размерность матрицы
+
+	int i = 0;
+	for (int s = 0; s < dim; s++)
+	{
+
+		//проверка для j 
+		if (i == N) i = 0;
+		// найдем теперь i
+		int j = (int)(((double)(s - i)) / ((double)N));
+
+		(*A)[s][s] = ;
+
+		if (i < N - 1)
+			(*A)[s][s + 1] = ;
+		if (i > 0)
+			(*A)[s][s - 1] = ;
+
+
+		if (j < M - 1)
+			(*A)[s][s + N] = ;
+		if (j > 0)
+			(*A)[s][s - N] = ;
+
+
+		i++;
+	}
+
+
+
+}
+
+
+
  Matrix<double> CreateLaplasMatrix(int N)
 {
 	int dim = (int)pow((N - 1), 2); //Размерность матрицы
