@@ -132,32 +132,95 @@ void LaplasPolar(Matrix<double> *A, int N, int M, double hr, double hphi)
 
 	int dim = N * M; //Размерность матрицы
 
-	int i = 0;
-	for (int s = 0; s < dim; s++)
+	int j = 0;
+	for (int s = M; s < dim - M; s++)
 	{
 
 		//проверка для j 
-		if (i == N) i = 0;
+		if (j == M) j = 0;
 		// найдем теперь i
-		int j = (int)(((double)(s - i)) / ((double)N));
+		int i = (int)((double)(s - j) / (double)M);
 
-		(*A)[s][s] = ;
+		(*A)[s][s] = -2.0*( 1.0/(hr*hr) + 1.0/(i*i*hr*hr*hphi*hphi));
 
 		if (i < N - 1)
-			(*A)[s][s + 1] = ;
+			(*A)[s][s + 1] = (1.0 / (hr*hr) - 1.0 /(2.0*i*hr*hr) );
 		if (i > 0)
-			(*A)[s][s - 1] = ;
+			(*A)[s][s - 1] = (1.0 / (hr*hr) + 1.0 / (2.0*i*hr*hr));
 
 
 		if (j < M - 1)
-			(*A)[s][s + N] = ;
+			(*A)[s][s + N] = 1.0/(i*i*hr*hr*hphi*hphi);
 		if (j > 0)
-			(*A)[s][s - N] = ;
+			(*A)[s][s - N] = 1.0 / (i*i*hr*hr*hphi*hphi);
 
-
-		i++;
+		j++;
 	}
 
+
+
+}
+
+
+void LaplasPolar2(Matrix<double> *A, int N, int M, double hr, double hphi)
+{
+
+	int dim = N * M; //Размерность матрицы
+	int s = 0;
+	
+	for (size_t i = 2; i < N - 2; i++)
+	{
+		for (size_t j = 1; j < M - 1; j++)
+		{
+			s = i*M + j;
+
+			(*A)[s][s] = -2.0*(1.0 / (hr*hr) + 1.0 / (j*j*hr*hr*hphi*hphi));
+			(*A)[s][s + 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
+			(*A)[s][s - 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			(*A)[s][s + N] = 1.0 / (j*j*hr*hr*hphi*hphi);
+			(*A)[s][s - N] = 1.0 / (j*j*hr*hr*hphi*hphi);
+
+			
+
+		}
+	}
+
+
+}
+/*
+
+A[s][s] = -2.0 * (1.0 / ( h_r * h_r ) + 1.0 / ( ri * ri * h_phi * h_phi ) );
+
+A[s][s + 1] = 1.0 / ( h_r * h_r ) - 1.0 / ( 2.0 * ri * h_r * h_r );
+A[s][s - 1] = 1.0 / ( h_r * h_r ) + 1.0 / ( 2.0 * ri * h_r * h_r );
+
+A[s][GRID_DIM_N + j] = 1.0 / ( ri * ri * h_phi * h_phi );
+A[s][s - GRID_DIM_N] = 1.0 / ( ri * ri * h_phi * h_phi );
+*/
+void LaplasPolar3(Matrix<double> *A, int N, int M, double hr, double hphi)
+{
+
+	int dim = N * M; //Размерность матрицы
+	int s = 0;
+	double ri = 0;
+	double h_phi = hphi;
+	double h_r = hr;
+	for (size_t i = 2; i < N - 2; i++)
+	{
+		for (size_t j = 1; j < M - 1; j++)
+		{
+			s = i*M + j;
+			ri = j*hr;
+			(*A)[s][s] = -2.0 * (1.0 / (h_r * h_r) + 1.0 / (ri * ri * h_phi * h_phi));
+			(*A)[s][s + 1] = 1.0 / (h_r * h_r) - 1.0 / (2.0 * ri * h_r * h_r);
+			(*A)[s][s - 1] = 1.0 / (h_r * h_r) + 1.0 / (2.0 * ri * h_r * h_r);
+			(*A)[s][s + N] = 1.0 / (ri * ri * h_phi * h_phi);
+			(*A)[s][s - N] = 1.0 / (ri * ri * h_phi * h_phi);
+
+
+
+		}
+	}
 
 
 }
