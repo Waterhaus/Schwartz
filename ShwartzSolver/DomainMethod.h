@@ -652,8 +652,8 @@ public:
 			s = i*SIZE + j;
 			
 			L[s][s] = -2.0*(1.0 / (hr*hr) + 1.0 / (j*j*hr*hr*hphi*hphi));
-			L[s][s + 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
-			L[s][s - 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			L[s][s + 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			L[s][s - 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
 			L[s][ SIZE + j ] = 1.0 / (j*j*hr*hr*hphi*hphi);
 			L[s][s - SIZE] = 1.0 / (j*j*hr*hr*hphi*hphi);
 			
@@ -664,8 +664,8 @@ public:
 			s = i*SIZE + j;
 
 			L[s][s] = -2.0*(1.0 / (hr*hr) + 1.0 / (j*j*hr*hr*hphi*hphi));
-			L[s][s + 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
-			L[s][s - 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			L[s][s + 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			L[s][s - 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
 			L[s][ j] = 1.0 / (j*j*hr*hr*hphi*hphi);
 			L[s][s - SIZE] = 1.0 / (j*j*hr*hr*hphi*hphi);
 
@@ -678,8 +678,8 @@ public:
 			s = i*SIZE + j;
 
 			L[j][j] = -2.0*(1.0 / (hr*hr) + 1.0 / (j*j*hr*hr*hphi*hphi));
-			L[j][j + 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
-			L[j][j - 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			L[j][j + 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			L[j][j - 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
 			L[j][j + SIZE] = 1.0 / (j*j*hr*hr*hphi*hphi);
 			L[j][s - SIZE] = 1.0 / (j*j*hr*hr*hphi*hphi);
 
@@ -690,8 +690,8 @@ public:
 			s = i*SIZE + j;
 			
 			L[s][s] = -2.0*(1.0 / (hr*hr) + 1.0 / (j*j*hr*hr*hphi*hphi));
-			L[s][s + 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
-			L[s][s - 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			L[s][s + 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			L[s][s - 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
 			L[s][s + SIZE] = 1.0 / (j*j*hr*hr*hphi*hphi);
 			L[s][ SIZE*(SIZE-1) + j ] = 1.0 / (j*j*hr*hr*hphi*hphi);
 
@@ -754,7 +754,16 @@ public:
 			LaplasPolar2(&L, SIZE, SIZE, hr, hphi);
 			u.Resize(SIZE*SIZE);
 			CorrectLaplasPolarMatrix();
-			if(SIZE == 9)cout << L << endl;
+			if (SIZE <= 9) { 
+				for (size_t i = 0; i < L.SizeN(); i++)
+				{
+					for (size_t j = 0; j < L.SizeM(); j++)
+					{
+						cout << L[i][j] << " ";
+					}
+					cout << " ( " << b[i] << ") " << endl;
+				}
+			}
 		}
 		Vector<double> x0 = u;
 		RelaxFastBad(&L, &b, &x0, &u, w, EPS, SIZE);

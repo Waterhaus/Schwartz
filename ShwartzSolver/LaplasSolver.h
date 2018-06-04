@@ -175,8 +175,8 @@ void LaplasPolar2(Matrix<double> *A, int N, int M, double hr, double hphi)
 			s = i*M + j;
 
 			(*A)[s][s] = -2.0*(1.0 / (hr*hr) + 1.0 / (j*j*hr*hr*hphi*hphi));
-			(*A)[s][s + 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
-			(*A)[s][s - 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			(*A)[s][s + 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			(*A)[s][s - 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
 			(*A)[s][s + N] = 1.0 / (j*j*hr*hr*hphi*hphi);
 			(*A)[s][s - N] = 1.0 / (j*j*hr*hr*hphi*hphi);
 

@@ -18,7 +18,7 @@ double Intercetion(double R, double Val)
 
 int main()
 {
-	int SIZE = 55;
+	int SIZE = 6;
 	double Radius = 4.5;
 
 	double HorY = 2;
@@ -73,6 +73,11 @@ int main()
 
 	double EPS = 0.00001;
 	circle.SolveLaplas(0.1, 0.00001);
+	cout << " L*identity = "<< circle.L*Vector<double>::Identity(circle.L.Size()) << endl;
+
+	cout << Relax(circle.L, circle.b, circle.u, 0.78, 0.00000001) << endl;
+	RelaxFastBad(&circle.L, &circle.b, &circle.u, &circle.u, 0.78, 0.00000001, SIZE);
+	//cout << circle.u << endl;
 	/*rightbox.SolveLaplas(1.4, EPS);
 	topbox.SolveLaplas(1.4, EPS);
 	leftbox.SolveLaplas(1.4, EPS);
