@@ -6,52 +6,10 @@
 #include "LaplasSolver.h"
 #include "Relax.h"
 using namespace std;
-# define M_PI           3.14159265358979323846  /* pi */
 
 
-double GetStep(int GridSize, double a_border, double b_border)
-{
-
-	if (a_border > b_border)
-	{
-		double temp = a_border;
-		a_border = b_border;
-		b_border = temp;
-	}
-
-	return (b_border - a_border) / (GridSize - 1);
-}
-
-double B(double x, double xi, double h)
-{
-	if (abs(x - xi) > h) return 0;
-	double temp = (x - xi) / h;
-
-	if (x - xi <= 0) return temp + 1;
-	else return -temp + 1;
-	
-}
-
-double F(double x, double y)
-{
-	return 0;
-}
-
-double G(double x, double y)
-{
-	return 1.0;
-}
-
-double Fpolar(double r, double phi)
-{
-	return F(r*cos(phi),r*sin(phi));
-}
 
 
-double Gpolar(double r, double phi)
-{
-	return G(r*cos(phi), r*sin(phi));
-}
 
 struct IndexPair {
 
@@ -95,7 +53,7 @@ public:
 		y_end = Y_end;
 		h = GetStep(SIZE, X_start, X_end);
 		double hy = GetStep(SIZE, Y_start, Y_end);
-		if (abs(h - hy) > 0.001) cout << "fail of box borders " + name << endl;
+		if (abs(h - hy) > 0.001) std::cout << "fail of box borders " + name << endl;
 
 
 
@@ -105,7 +63,7 @@ public:
 		FillBorderCoords();
 		vector<double> bord(border_in.size());
 		UpdateBorder(bord.data(), bord.size());
-		cout << name + " is generated" << endl;
+		std::cout << name + " is generated" << endl;
 	}
 
 	void FillRightPart()
@@ -201,14 +159,17 @@ public:
 		int s = 0;
 		int i = 0;
 		int j = 0;
+		cout << name + " - updating border"<< endl;
 		for (size_t k = 0; k < size; k++)
 		{
 			i = border_in[k].index_i;
 			j = border_in[k].index_j;
 			s = i*SIZE + j;
 			b[s] = border[k];
+			cout << b[s] << " ";
 		}
-		cout << name + " - border updated" << endl;
+		cout << endl;
+		std::cout << name + " - border updated" << endl;
 	}
 
 	//определяем индекс i*h <= val <= (i+1)*h
@@ -229,18 +190,28 @@ public:
 			i = FindIndex(y[k], y_start);
 			j = FindIndex(x[k], x_start);
 
+			if (i < 0) i = 0;
+			if (j < 0) j = 0;
+			if (j >= SIZE) j = SIZE - 1;
+			if (i >= SIZE) i = SIZE - 1;
+
 			s1 = i*SIZE + j;
 			s2 = (i + 1)*SIZE + j;
 			s3 = i*SIZE + j + 1;
 			s4 = (i + 1)*SIZE + j + 1;
 
+			if (i == 0 || j == 0 || i == SIZE - 1 || j == SIZE - 1) g[k] = u[s1];
+			else
+			{
 			g[k] = u[s1] * B(x[k], x_start + j*h, h)*B(y[k], y_start + i*h, h) +
 				u[s2] * B(x[k], x_start + j*h, h)*B(y[k], y_start + (i + 1)*h, h) +
 				u[s3] * B(x[k], x_start + (j + 1)*h, h)*B(y[k], y_start + i*h, h) +
 				u[s4] * B(x[k], x_start + (j + 1)*h, h)*B(y[k], y_start + (i + 1)*h, h);
 
+			}
+			
 		}
-		cout << name + " - interpolating done";
+		std::cout << name + " - interpolating done";
 	}
 
 	void CorrectLaplasMatrix()
@@ -282,7 +253,7 @@ public:
 		}
 		Vector<double> x0 = u;
 		RelaxFast(&L, &b, &x0, &u, w, EPS,SIZE);
-		cout << "new solve complete for " + name << endl;
+		std::cout << "new solve complete for " + name << endl;
 	}
 
 
@@ -309,14 +280,14 @@ public:
 		}
 
 		myfile.close();
-		cout << "save to " + name + ".txt" << endl;
+		std::cout << "save to " + name + ".txt" << endl;
 
 
 	}
 };
 
 
-
+/*
 struct Sector 
 {
 	int begin;
@@ -361,57 +332,57 @@ public:
 		if(x.size() == 8)
 		{
 			double phi = acos(x[0] / RAD);
-			cout << 2.0*M_PI - phi << endl;
-			cout << phi << endl;
+			std::cout << 2.0*M_PI - phi << endl;
+			std::cout << phi << endl;
 			rigthSec.end = FindIndex(phi, hphi);
 			rigthSec.begin = FindIndex(2.0*M_PI - phi, hphi);
 
 
 			phi = acos(x[2] / RAD);
-			cout << phi << endl;
+			std::cout << phi << endl;
 			topSec.begin = FindIndex(phi, hphi);
 			
-			cout << "pi/2 = " << M_PI / 2 << endl;
+			std::cout << "pi/2 = " << M_PI / 2 << endl;
 			
 			phi =  acos(x[3] / RAD);
-			cout << phi << endl;
+			std::cout << phi << endl;
 			topSec.end = FindIndex(phi, hphi);
 
 
 
 			phi = acos(x[4] / RAD);
-			cout << phi << endl;
+			std::cout << phi << endl;
 			leftSec.begin = FindIndex(phi, hphi);
 			
-			cout << "pi = " << M_PI << endl;
+			std::cout << "pi = " << M_PI << endl;
 
 			phi = 2*M_PI - acos(x[5] / RAD);
-			cout << phi << endl;
+			std::cout << phi << endl;
 			leftSec.end = FindIndex(phi, hphi);
 
 
 			phi = 2 * M_PI - acos(x[6] / RAD);
-			cout << phi << endl;
+			std::cout << phi << endl;
 			bottomSec.begin = FindIndex(phi, hphi);
 			
-			cout << "3pi/2 = " << 3*M_PI/2 << endl;
+			std::cout << "3pi/2 = " << 3*M_PI/2 << endl;
 
 			phi = 2 * M_PI - acos(x[7] / RAD);
-			cout << phi << endl;
+			std::cout << phi << endl;
 			bottomSec.end = FindIndex(phi, hphi);
 
 
-			cout << rigthSec.begin << "  " << rigthSec.end << endl;
-			cout << topSec.begin << "  " << topSec.end << endl;
-			cout << leftSec.begin << "  " << leftSec.end << endl;
-			cout << bottomSec.begin << "  " << bottomSec.end << endl;
+			std::cout << rigthSec.begin << "  " << rigthSec.end << endl;
+			std::cout << topSec.begin << "  " << topSec.end << endl;
+			std::cout << leftSec.begin << "  " << leftSec.end << endl;
+			std::cout << bottomSec.begin << "  " << bottomSec.end << endl;
 
 		}
 
 		FillBorderCoords();
 		FillRightPart(A0);
 
-		cout << name + " is generated" << endl;
+		std::cout << name + " is generated" << endl;
 		
 	}
 
@@ -466,27 +437,27 @@ public:
 	{
 		if (k >= topSec.begin && k <= topSec.end)
 		{
-			cout << "1" << endl;
+			std::cout << "1" << endl;
 			return true;
 		}
 		if (k >= leftSec.begin && k <= leftSec.end)
 		{
-			cout << "2" << endl;
+			std::cout << "2" << endl;
 			return true;
 		}
 		if (k >= bottomSec.begin && k <= bottomSec.end)
 		{
-			cout << "3" << endl;
+			std::cout << "3" << endl;
 			return true;
 		}
 		if (k >= rigthSec.begin && k < SIZE)
 		{
-			cout << "4" << endl;
+			std::cout << "4" << endl;
 			return true;
 		}
 		if (k >= 0 && k <= rigthSec.end)
 		{
-			cout << "5" << endl;
+			std::cout << "5" << endl;
 			return true;
 		}
 
@@ -530,7 +501,7 @@ public:
 
 			}
 		}
-		//cout << b << endl;
+		//std::cout << b << endl;
 	}
 
 	
@@ -578,7 +549,7 @@ public:
 		}
 
 
-		cout << name + " - border updated" << endl;
+		std::cout << name + " - border updated" << endl;
 	}
 
 	//определяем индекс i*h <= val <= (i+1)*h
@@ -626,19 +597,12 @@ public:
 				u[s4] * B(r[k], (j + 1)*hr, hr)*B(phi[k],(i + 1)*hphi, hphi);
 
 		}
-		cout << name + " - interpolating done";
+		std::cout << name + " - interpolating done";
 	}
 
 	void CorrectLaplasPolarMatrix()
 	{
-/*
-		A[s][s] = -2.0 * (1.0 / (h_r * h_r) + 1.0 / (ri * ri * h_phi * h_phi));
 
-		A[s][s + 1] = 1.0 / (h_r * h_r) - 1.0 / (2.0 * ri * h_r * h_r);
-		A[s][s - 1] = 1.0 / (h_r * h_r) + 1.0 / (2.0 * ri * h_r * h_r);
-
-		A[s][GRID_DIM_N + j] = 1.0 / (ri * ri * h_phi * h_phi);
-		A[s][s - GRID_DIM_N] = 1.0 / (ri * ri * h_phi * h_phi);*/
 		int s = 0;
 		
 		//phi == 2pi
@@ -715,7 +679,7 @@ public:
 		//		L[index[k]][l] = 0;
 		//	}
 		//	L[index[k]][index[k]] = 1;
-		//	cout << "L[s][s] = " << L[index[k]][index[k]] << "; b[s] = " << b[index[k]] << endl;
+		//	std::cout << "L[s][s] = " << L[index[k]][index[k]] << "; b[s] = " << b[index[k]] << endl;
 		//	//	
 		//}
 		for (i = 0; i < SIZE ; i++)
@@ -734,16 +698,11 @@ public:
 			b[s + SIZE - 1] = 1;
 
 		
-			cout << "L[s][s] = " << L[s][s] << "; b[s] = " << b[s] << endl;
-			cout << "L[s + ][s + ] = " << L[s + SIZE - 1][s + SIZE - 1] << "; b[s +] = " << b[s + SIZE - 1] << endl;
+			std::cout << "L[s][s] = " << L[s][s] << "; b[s] = " << b[s] << endl;
+			std::cout << "L[s + ][s + ] = " << L[s + SIZE - 1][s + SIZE - 1] << "; b[s +] = " << b[s + SIZE - 1] << endl;
 		}
 
-/*
-		for (size_t k = 1; k < SIZE*SIZE - 1; k++)
-		{
-			cout << L[k][k - 1] << " " << L[k][k] << " " << L[k][k + 1] <<endl;
-		}
-*/
+
 	}
 
 	void SolveLaplas(double w, double EPS)
@@ -759,15 +718,15 @@ public:
 				{
 					for (size_t j = 0; j < L.SizeM(); j++)
 					{
-						cout << L[i][j] << " ";
+						std::cout << L[i][j] << " ";
 					}
-					cout << " ( " << b[i] << ") " << endl;
+					std::cout << " ( " << b[i] << ") " << endl;
 				}
 			}
 		}
 		Vector<double> x0 = u;
 		RelaxFastBad(&L, &b, &x0, &u, w, EPS, SIZE);
-		cout << "new solve complete for " + name << endl;
+		std::cout << "new solve complete for " + name << endl;
 	}
 
 	void Save()
@@ -793,9 +752,9 @@ public:
 		}
 
 		myfile.close();
-		cout << "save to " + name + ".txt" << endl;
+		std::cout << "save to " + name + ".txt" << endl;
 
 
 	}
 };
-
+*/

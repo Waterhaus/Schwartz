@@ -1,7 +1,8 @@
-#pragma once
+п»ї#pragma once
 #include "Matrix.h"
 #include <vector>
-
+# define M_PI           3.14159265358979323846  /* pi */
+using namespace std;
 double f(double x, double y)
 {
 	return 0;
@@ -10,11 +11,106 @@ double g(double x, double y)
 {
 	return 10*sin(x) + 20;
 }
+double GetStep(int GridSize, double a_border, double b_border)
+{
+
+	if (a_border > b_border)
+	{
+		double temp = a_border;
+		a_border = b_border;
+		b_border = temp;
+	}
+
+	return (b_border - a_border) / (GridSize - 1);
+}
+
+double B(double x, double xi, double h)
+{
+	if (abs(x - xi) > h) return 0;
+	double temp = (x - xi) / h;
+
+	if (x - xi <= 0) return temp + 1;
+	else return -temp + 1;
+
+}
+
+double F(double x, double y)
+{
+	return sin(x) + sin(y);
+}
+
+double G(double x, double y)
+{
+	return 1.0;
+}
+
+double Fpolar(double r, double phi)
+{
+	return F(r*cos(phi), r*sin(phi));
+}
+
+
+double Gpolar(double r, double phi)
+{
+	return G(r*cos(phi), r*sin(phi));
+}
+
+struct SparseMatrix
+{
+	vector<vector<double>> Mat;
+	vector<vector<int>> index;
+};
+
+
+void LaplasPolar(SparseMatrix *A, int N, int M, double hr, double hphi)
+{
+
+	int dim = N * M; 
+	int s = 0;
+
+	A->Mat.resize(dim);
+	A->index.resize(dim);
+	double temp = 0;
+
+	for (size_t i = 2; i < N - 2; i++)
+	{
+		for (size_t j = 1; j < M - 1; j++)
+		{
+			s = i * M + j;
+
+			//(*A)[s][s] = -2.0*(1.0 / (hr*hr) + 1.0 / (j*j*hr*hr*hphi*hphi));
+			temp = -2.0*(1.0 / (hr*hr) + 1.0 / (j*j*hr*hr*hphi*hphi));
+			A->Mat[s].push_back(temp);
+			A->index[s].push_back(s);
+			//(*A)[s][s + 1] = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			temp = (1.0 / (hr*hr) + 1.0 / (2.0*j*hr*hr));
+			A->Mat[s].push_back(temp);
+			A->index[s].push_back(s + 1);
+			//(*A)[s][s - 1] = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
+			temp = (1.0 / (hr*hr) - 1.0 / (2.0*j*hr*hr));
+			A->Mat[s].push_back(temp);
+			A->index[s].push_back(s - 1);
+			//(*A)[s][s + N] = 1.0 / (j*j*hr*hr*hphi*hphi);
+			temp = 1.0 / (j*j*hr*hr*hphi*hphi);
+			A->Mat[s].push_back(temp);
+			A->index[s].push_back(s + N);
+			//(*A)[s][s - N] = 1.0 / (j*j*hr*hr*hphi*hphi);
+			temp = 1.0 / (j*j*hr*hr*hphi*hphi);
+			A->Mat[s].push_back(temp);
+			A->index[s].push_back(s - N);
+
+
+
+		}
+	}
+	std::cout << "sparse matrix created" << endl;
+
+}
 
 Matrix<double> Laplas(int N1,  double hx, double hy)
 {
 
-	int dim = N1 * N1; //Размерность матрицы
+	int dim = N1 * N1; //Р Р°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°С‚СЂРёС†С‹
 	Matrix<double> A(dim);
 
 
@@ -23,9 +119,9 @@ Matrix<double> Laplas(int N1,  double hx, double hy)
 	for (int s = 0; s < dim; s++)
 	{
 
-		//проверка для j 
+		//РїСЂРѕРІРµСЂРєР° РґР»СЏ j 
 		if (i == N1) i = 0;
-		// найдем теперь i
+		// РЅР°Р№РґРµРј С‚РµРїРµСЂСЊ i
 		int j = (int)(((double)(s - i)) / ((double)N1));
 
 		A[s][ s] = 2 * (1.0f / (hx*hx) + 1.0f / (hy*hy));
@@ -50,7 +146,7 @@ Matrix<double> Laplas(int N1,  double hx, double hy)
 Matrix<double> Laplas(int N, int M, double hx, double hy)
 {
 
-	int dim = N * M; //Размерность матрицы
+	int dim = N * M; //Р Р°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°С‚СЂРёС†С‹
 	Matrix<double> A(dim);
 
 
@@ -63,9 +159,9 @@ Matrix<double> Laplas(int N, int M, double hx, double hy)
 		{
 			int c = 0;
 		}
-		//проверка для j 
+		//РїСЂРѕРІРµСЂРєР° РґР»СЏ j 
 		if (i == N) i = 0;
-		// найдем теперь i
+		// РЅР°Р№РґРµРј С‚РµРїРµСЂСЊ i
 		int j = (int)(((double)(s - i)) / ((double)N));
 
 		A[s][ s] = 2 * (1.0f / (hx*hx) + 1.0f / (hy*hy));
@@ -81,7 +177,7 @@ Matrix<double> Laplas(int N, int M, double hx, double hy)
 		if (j > 0) 
 			A[s][s - M] = -1.0f / (hy*hy);
 
-		cout << A[s][s] << endl;
+		std::cout << A[s][s] << endl;
 		i++;
 	}
 
@@ -93,15 +189,15 @@ Matrix<double> Laplas(int N, int M, double hx, double hy)
 void Laplas(Matrix<double> *A, int N, int M, double hx, double hy)
 {
 
-	int dim = N * M; //Размерность матрицы
+	int dim = N * M; //Р Р°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°С‚СЂРёС†С‹
 
 	int i = 0;
 	for (int s = 0; s < dim; s++)
 	{
 		
-		//проверка для j 
+		//РїСЂРѕРІРµСЂРєР° РґР»СЏ j 
 		if (i == N) i = 0;
-		// найдем теперь i
+		// РЅР°Р№РґРµРј С‚РµРїРµСЂСЊ i
 		int j = (int)(((double)(s - i)) / ((double)N));
 
 		(*A)[s][s] = 2 * (1.0f / (hx*hx) + 1.0f / (hy*hy));
@@ -130,15 +226,15 @@ void Laplas(Matrix<double> *A, int N, int M, double hx, double hy)
 void LaplasPolar(Matrix<double> *A, int N, int M, double hr, double hphi)
 {
 
-	int dim = N * M; //Размерность матрицы
+	int dim = N * M; //Р Р°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°С‚СЂРёС†С‹
 
 	int j = 0;
 	for (int s = M; s < dim - M; s++)
 	{
 
-		//проверка для j 
+		//РїСЂРѕРІРµСЂРєР° РґР»СЏ j 
 		if (j == M) j = 0;
-		// найдем теперь i
+		// РЅР°Р№РґРµРј С‚РµРїРµСЂСЊ i
 		int i = (int)((double)(s - j) / (double)M);
 
 		(*A)[s][s] = -2.0*( 1.0/(hr*hr) + 1.0/(i*i*hr*hr*hphi*hphi));
@@ -165,7 +261,7 @@ void LaplasPolar(Matrix<double> *A, int N, int M, double hr, double hphi)
 void LaplasPolar2(Matrix<double> *A, int N, int M, double hr, double hphi)
 {
 
-	int dim = N * M; //Размерность матрицы
+	int dim = N * M; //Р Р°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°С‚СЂРёС†С‹
 	int s = 0;
 	
 	for (size_t i = 2; i < N - 2; i++)
@@ -187,20 +283,11 @@ void LaplasPolar2(Matrix<double> *A, int N, int M, double hr, double hphi)
 
 
 }
-/*
 
-A[s][s] = -2.0 * (1.0 / ( h_r * h_r ) + 1.0 / ( ri * ri * h_phi * h_phi ) );
-
-A[s][s + 1] = 1.0 / ( h_r * h_r ) - 1.0 / ( 2.0 * ri * h_r * h_r );
-A[s][s - 1] = 1.0 / ( h_r * h_r ) + 1.0 / ( 2.0 * ri * h_r * h_r );
-
-A[s][GRID_DIM_N + j] = 1.0 / ( ri * ri * h_phi * h_phi );
-A[s][s - GRID_DIM_N] = 1.0 / ( ri * ri * h_phi * h_phi );
-*/
 void LaplasPolar3(Matrix<double> *A, int N, int M, double hr, double hphi)
 {
 
-	int dim = N * M; //Размерность матрицы
+	int dim = N * M; //Р Р°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°С‚СЂРёС†С‹
 	int s = 0;
 	double ri = 0;
 	double h_phi = hphi;
@@ -229,7 +316,7 @@ void LaplasPolar3(Matrix<double> *A, int N, int M, double hr, double hphi)
 
  Matrix<double> CreateLaplasMatrix(int N)
 {
-	int dim = (int)pow((N - 1), 2); //Размерность матрицы
+	int dim = (int)pow((N - 1), 2); //Р Р°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°С‚СЂРёС†С‹
 	Matrix<double> A(dim);
 	int n = N - 1;
 
@@ -407,9 +494,9 @@ void LaplasPolar3(Matrix<double> *A, int N, int M, double hr, double hphi)
 	 {
 		 for (size_t j = 0; j < N; j++)
 		 {
-			 cout << index[i*N + j] << " ";
+			 std::cout << index[i*N + j] << " ";
 		 }
-		 cout << endl;
+		 std::cout << endl;
 	 }
 
  }
@@ -422,9 +509,9 @@ void CreateRightPart(Vector<double>* b,vector<int>* index, int N, double hx,doub
 	int j = 0;
 	for (size_t s = 0; s < b->Size(); s++)
 	{
-		//проверка для j 
+		//РїСЂРѕРІРµСЂРєР° РґР»СЏ j 
 		if (i == N) i = 0;
-		// найдем теперь i
+		// РЅР°Р№РґРµРј С‚РµРїРµСЂСЊ i
 		j = (int)(((double)(s - i)) / ((double)N));
 
 		if ((*index)[s] == 2) (*b)[s] = g(i*hx - Rx, j*hy - Ry);

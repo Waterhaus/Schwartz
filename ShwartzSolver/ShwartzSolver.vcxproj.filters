@@ -45,7 +45,13 @@
     <ClInclude Include="MPI_Shwartz.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
-    <ClInclude Include="DomainMethod.h">
+    <ClInclude Include="CircleDomain.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxDomain.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="ShwartzDirect.h">
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>

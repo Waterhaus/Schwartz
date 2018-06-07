@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <iostream>
 #include "Matrix.h"
-
+#include "LaplasSolver.h"
 
 using namespace std;
 Vector<double> Relax(Matrix<double> A, Vector<double> b, Vector<double> x0, double w, double EPS)
@@ -84,7 +84,7 @@ void RelaxFast(Matrix<double> *A,
 {
 
 	Vector<double> x = (*A)*(*x0);
-	cout  << "b = "<< (*b) << endl;
+	//cout  << "b = "<< (*b) << endl;
 	//cout << "Ax0 = " << x << endl;
 
 	
@@ -123,51 +123,31 @@ void RelaxFast(Matrix<double> *A,
 		(*solution)[i] = x[i];
 	}
 	cout << endl;
-	cout << "solve with w = " << w << "; x = " << (*solution) << "; " << iter << " iterations." << endl;
+	cout << "solve complete; with w = " << w << "; " << iter << " iterations." << endl;
 	
 }
 
-
-
-void RelaxFastBad(Matrix<double> *A,
-	Vector<double> *b,
-	Vector<double> *x0,
-	Vector<double> *solution, double w, double EPS, int N)
+void RelaxSparse(SparseMatrix *A, Vector<double> *b, Vector<double> *x0, Vector<double> *solution, double w, double EPS)
 {
 
-	Vector<double> x = (*A)*(*x0);
-	cout << "b = " << (*b) << endl;
-	cout << "Ax0 = " << x << endl;
-	x = Vector<double>::Identity(x.Size());
+	Vector<double> x = Vector<double>::ConstVector(0.5, (*b).Size());
 
 	double S = 0;
 	int iter = 0;
-	int k = 0;
 	while (iter == 0 || (x - (*x0)).norm2() > EPS)
 	{
-		int i = 0;
-		int j = 0;
-		for (size_t s = 0; s < x.Size(); s++)
+
+		for (size_t i = 0; i < x.Size(); i++)
 		{
-
-			if (j == N) j = 0;
-			i = (s - j + 0.0) / (double)N;
 			S = 0;
-			S = S + (*A)[s][s - 1] * x[s - 1];
-			S = S + (*A)[s][s + 1] * x[s + 1];
-			S = S + (*A)[s][s - N] * x[s - N];
-			S = S + (*A)[s][s + N] * x[s + N];
-			S = S + (*A)[s][N*(N - 2) + j] * x[N*(N - 2) + j];
-			S = S + (*A)[s][N*(N - 1) + j] * x[N*(N - 1) + j];
-			S = S + (*A)[s][j]*x[]
-			
+			for (size_t j = 1; j < A->Mat[i].size(); j++)
+			{
+				S = S + A->Mat[i][j] * x[A->index[i][j]];
+			}
 			//cout << "S = " << S << endl;
-			(*x0)[s] = x[s];
+			(*x0)[i] = x[i];
+			x[i] = (1.0 - w)*x[i] + (w / A->Mat[i][0])*((*b)[i] - S);
 
-
-		
-			x[s] = (1.0 - w)*x[s] + (w / (*A)[s][s])*((*b)[s] - S);
-			j++;
 		}
 		iter++;
 		cout << "||x - x_prev|| = " << (x - (*x0)).norm2() << '\r';
@@ -177,6 +157,7 @@ void RelaxFastBad(Matrix<double> *A,
 	{
 		(*solution)[i] = x[i];
 	}
-	cout << "RelaxBad:  solve with w = " << w << "; x = " << (*solution) << "; " << iter << " iterations." << endl;
+	cout << endl;
+	cout << "solve complete; with w = " << w << "; " << iter << " iterations." << endl;
 
 }

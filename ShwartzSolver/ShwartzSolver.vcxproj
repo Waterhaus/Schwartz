@@ -148,12 +148,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DomainMethod.h" />
+    <ClInclude Include="CircleDomain.h" />
+    <ClInclude Include="BoxDomain.h" />
     <ClInclude Include="LaplasSolver.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="MPI_Shwartz.h" />
     <ClInclude Include="Relax.h" />
     <ClInclude Include="SaveFile.h" />
+    <ClInclude Include="ShwartzDirect.h" />
     <ClInclude Include="ShwartzSolver.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

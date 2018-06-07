@@ -104,6 +104,18 @@ public:
 		return max;
 	}
 
+	T min()
+	{
+		T min = v[0];
+		T temp = 0;
+		for (size_t i = 1; i < size; i++)
+		{
+			temp = v[i];
+			if (temp < min) min = temp;
+		}
+		return min;
+	}
+
 
 
 
@@ -168,6 +180,18 @@ public:
 		}
 
 		return b;
+	}
+	static Vector<T> ConstVector(T c, int N)
+	{
+		size_t size = N;
+		Vector<T> vec(size);
+		T S = 0.0;
+		for (size_t i = 0; i < size; i++)
+		{
+			vec[i] = c;
+		}
+		return vec;
+
 	}
 
 	void Resize(int SIZE)
